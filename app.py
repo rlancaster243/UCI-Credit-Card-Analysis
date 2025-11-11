@@ -38,6 +38,82 @@ def load_data():
 df = load_data()
 
 # =====================================================================================
+# SIDEBAR: USER INPUT FORM
+# =====================================================================================
+with st.sidebar:
+    st.header("Make a Prediction")
+    st.markdown("Provide the customer's profile and recent payment history:")
+
+    # --- High-level profile ---
+    limit_bal = st.number_input(
+        "Total credit limit on this card",
+        min_value=0,
+        value=50000,
+        step=1000
+    )
+
+    gender_label = st.selectbox(
+        "Gender",
+        ["Male", "Female"]
+    )
+    sex = 1 if gender_label == "Male" else 2  # dataset: 1=male, 2=female
+
+    education_map = {
+        "Graduate school": 1,
+        "University": 2,
+        "High school": 3,
+        "Other / unknown": 4
+    }
+    education_label = st.selectbox(
+        "Highest education level",
+        list(education_map.keys())
+    )
+    education = education_map[education_label]
+
+    marriage_map = {
+        "Married": 1,
+        "Single": 2,
+        "Other / unknown": 3
+    }
+    marriage_label = st.selectbox(
+        "Marital status",
+        list(marriage_map.keys())
+    )
+    marriage = marriage_map[marriage_label]
+
+    age = st.slider("Age (years)", 21, 79, 35)
+
+    # --- Payment status (how late they were) ---
+    st.markdown("**Recent payment status (months past due)**")
+    st.caption("Negative = paid in full / on time, positive = months behind schedule.")
+    pay_0 = st.slider("Most recent month", -2, 8, 0)
+    pay_2 = st.slider("2 months ago", -2, 8, 0)
+    pay_3 = st.slider("3 months ago", -2, 8, 0)
+    pay_4 = st.slider("4 months ago", -2, 8, 0)
+    pay_5 = st.slider("5 months ago", -2, 8, 0)
+    pay_6 = st.slider("6 months ago", -2, 8, 0)
+
+    # --- Statement balances ---
+    st.markdown("**Credit card statement balances**")
+    bill_amt1 = st.number_input("Latest statement balance", value=0)
+    bill_amt2 = st.number_input("Statement balance 1 month ago", value=0)
+    bill_amt3 = st.number_input("Statement balance 2 months ago", value=0)
+    bill_amt4 = st.number_input("Statement balance 3 months ago", value=0)
+    bill_amt5 = st.number_input("Statement balance 4 months ago", value=0)
+    bill_amt6 = st.number_input("Statement balance 5 months ago", value=0)
+
+    # --- Payments made ---
+    st.markdown("**Payments made toward the card**")
+    pay_amt1 = st.number_input("Payment on latest statement", value=0)
+    pay_amt2 = st.number_input("Payment 1 month ago", value=0)
+    pay_amt3 = st.number_input("Payment 2 months ago", value=0)
+    pay_amt4 = st.number_input("Payment 3 months ago", value=0)
+    pay_amt5 = st.number_input("Payment 4 months ago", value=0)
+    pay_amt6 = st.number_input("Payment 5 months ago", value=0)
+
+    predict_button = st.button("Predict default risk")
+
+# =====================================================================================
 # BASIC EXPLORATION
 # =====================================================================================
 if st.checkbox("Show raw data"):
@@ -213,97 +289,9 @@ st.pyplot(plt.gcf())
 plt.close()
 
 # =====================================================================================
-# INTERACTIVE PREDICTION (USES SAME MODEL + THRESHOLD)
+# USE SIDEBAR INPUT FOR PREDICTION
 # =====================================================================================
-st.sidebar.header("Make a Prediction")
-st.sidebar.markdown("Provide the customer's profile and recent payment history:")
-
-# --- High-level profile ---
-limit_bal = st.sidebar.number_input(
-    "Total credit limit on this card",
-    min_value=0,
-    value=50000,
-    step=1000
-)
-
-gender_label = st.sidebar.selectbox(
-    "Gender",
-    ["Male", "Female"]
-)
-sex = 1 if gender_label == "Male" else 2  # dataset: 1=male, 2=female
-
-education_map = {
-    "Graduate school": 1,
-    "University": 2,
-    "High school": 3,
-    "Other / unknown": 4
-}
-education_label = st.sidebar.selectbox(
-    "Highest education level",
-    list(education_map.keys())
-)
-education = education_map[education_label]
-
-marriage_map = {
-    "Married": 1,
-    "Single": 2,
-    "Other / unknown": 3
-}
-marriage_label = st.sidebar.selectbox(
-    "Marital status",
-    list(marriage_map.keys())
-)
-marriage = marriage_map[marriage_label]
-
-age = st.sidebar.slider("Age (years)", 21, 79, 35)
-
-# --- Payment status (how late they were) ---
-st.sidebar.markdown("**Recent payment status (how late the customer was)**")
-pay_0 = st.sidebar.slider(
-    "Most recent month",
-    -2, 8, 0,
-    help="Negative values = paid in full / no usage; positive values = months past due."
-)
-pay_2 = st.sidebar.slider(
-    "2 months ago",
-    -2, 8, 0
-)
-pay_3 = st.sidebar.slider(
-    "3 months ago",
-    -2, 8, 0
-)
-pay_4 = st.sidebar.slider(
-    "4 months ago",
-    -2, 8, 0
-)
-pay_5 = st.sidebar.slider(
-    "5 months ago",
-    -2, 8, 0
-)
-pay_6 = st.sidebar.slider(
-    "6 months ago",
-    -2, 8, 0
-)
-
-# --- Statement balances ---
-st.sidebar.markdown("**Credit card statement balances**")
-bill_amt1 = st.sidebar.number_input("Latest statement balance", value=0)
-bill_amt2 = st.sidebar.number_input("Statement balance 1 month ago", value=0)
-bill_amt3 = st.sidebar.number_input("Statement balance 2 months ago", value=0)
-bill_amt4 = st.sidebar.number_input("Statement balance 3 months ago", value=0)
-bill_amt5 = st.sidebar.number_input("Statement balance 4 months ago", value=0)
-bill_amt6 = st.sidebar.number_input("Statement balance 5 months ago", value=0)
-
-# --- Payments made ---
-st.sidebar.markdown("**Payments made toward the card**")
-pay_amt1 = st.sidebar.number_input("Payment made on latest statement", value=0)
-pay_amt2 = st.sidebar.number_input("Payment made 1 month ago", value=0)
-pay_amt3 = st.sidebar.number_input("Payment made 2 months ago", value=0)
-pay_amt4 = st.sidebar.number_input("Payment made 3 months ago", value=0)
-pay_amt5 = st.sidebar.number_input("Payment made 4 months ago", value=0)
-pay_amt6 = st.sidebar.number_input("Payment made 5 months ago", value=0)
-
-if st.sidebar.button("Predict"):
+if predict_button:
     user_input = pd.DataFrame({
         "LIMIT_BAL": [limit_bal],
         "SEX": [sex],
@@ -333,11 +321,12 @@ if st.sidebar.button("Predict"):
     user_proba = model.predict_proba(user_input)[0, 1]
     user_pred = int(user_proba >= threshold)
 
-    st.sidebar.subheader("Prediction Result")
-    if user_pred == 1:
-        st.sidebar.error("Customer is **likely to default** on next payment.")
-    else:
-        st.sidebar.success("Customer is **unlikely to default** on next payment.")
+    with st.sidebar:
+        st.subheader("Prediction Result")
+        if user_pred == 1:
+            st.error("Customer is **likely to default** on next payment.")
+        else:
+            st.success("Customer is **unlikely to default** on next payment.")
 
-    st.sidebar.write(f"Estimated probability of default: **{user_proba:.2%}**")
-    st.sidebar.write(f"Decision threshold currently in use: **{threshold:.2f}**")
+        st.write(f"Estimated probability of default: **{user_proba:.2%}**")
+        st.write(f"Decision threshold currently in use: **{threshold:.2f}**")
